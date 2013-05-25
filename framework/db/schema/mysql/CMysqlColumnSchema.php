@@ -4,7 +4,7 @@
  *
  * @author Qiang Xue <qiang.xue@gmail.com>
  * @link http://www.yiiframework.com/
- * @copyright Copyright &copy; 2008-2011 Yii Software LLC
+ * @copyright 2008-2013 Yii Software LLC
  * @license http://www.yiiframework.com/license/
  */
 
@@ -54,16 +54,17 @@ class CMysqlColumnSchema extends CDbColumnSchema
 	 */
 	protected function extractLimit($dbType)
 	{
-		if (strncmp($dbType, 'enum', 4)===0 && preg_match('/\((.*)\)/',$dbType,$matches))
+		if (strncmp($dbType, 'enum', 4)===0 && preg_match('/\(([\'"])(.*)\\1\)/',$dbType,$matches))
 		{
-			$values = explode(',', $matches[1]);
+			// explode by (single or double) quote and comma (ENUM values may contain commas)
+			$values = explode($matches[1].','.$matches[1], $matches[2]);
 			$size = 0;
 			foreach($values as $value)
 			{
 				if(($n=strlen($value)) > $size)
 					$size=$n;
 			}
-			$this->size = $this->precision = $size-2;
+			$this->size = $this->precision = $size;
 		}
 		else
 			parent::extractLimit($dbType);
